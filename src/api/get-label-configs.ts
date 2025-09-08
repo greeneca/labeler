@@ -11,14 +11,16 @@ import {
 
 import {toBranchMatchConfig, BranchMatchConfig} from '../branch';
 
+import { toMergableMatchConfig, MergableMatchConfig } from '../mergable';
+
 export interface MatchConfig {
   all?: BaseMatchConfig[];
   any?: BaseMatchConfig[];
 }
 
-export type BaseMatchConfig = BranchMatchConfig & ChangedFilesMatchConfig;
+export type BaseMatchConfig = BranchMatchConfig & ChangedFilesMatchConfig & MergableMatchConfig;
 
-const ALLOWED_CONFIG_KEYS = ['changed-files', 'head-branch', 'base-branch'];
+const ALLOWED_CONFIG_KEYS = ['changed-files', 'head-branch', 'base-branch', 'mergable'];
 
 export const getLabelConfigs = (
   client: ClientType,
@@ -118,9 +120,11 @@ export function getLabelConfigMapFromObject(
 export function toMatchConfig(config: any): BaseMatchConfig {
   const changedFilesConfig = toChangedFilesMatchConfig(config);
   const branchConfig = toBranchMatchConfig(config);
+  const mergableConfig = toMergableMatchConfig(config);
 
   return {
     ...changedFilesConfig,
-    ...branchConfig
+    ...branchConfig,
+    ...mergableConfig
   };
 }

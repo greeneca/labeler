@@ -11,6 +11,8 @@ import {checkAllChangedFiles, checkAnyChangedFiles} from './changedFiles';
 
 import {checkAnyBranch, checkAllBranch} from './branch';
 
+import {checkAnyMergable, checkAllMergable, getMergable} from './mergable';
+
 type ClientType = ReturnType<typeof github.getOctokit>;
 
 // GitHub Issues cannot have more than 100 labels
@@ -173,6 +175,13 @@ export function checkAny(
         return true;
       }
     }
+
+    if (matchConfig.mergable) {
+      if (checkAnyMergable(matchConfig.mergable, getMergable())) {
+        core.debug(`  "any" patterns matched`);
+        return true;
+      }
+    }
   }
 
   core.debug(`  "any" patterns did not match any configs`);
@@ -218,6 +227,13 @@ export function checkAll(
       if (!checkAllBranch(matchConfig.headBranch, 'head')) {
         core.debug(`  "all" patterns did not match`);
         return false;
+      }
+    }
+
+    if (matchConfig.mergable) {
+      if (checkAllMergable(matchConfig.mergable, getMergable())) {
+        core.debug(`  "any" patterns matched`);
+        return true;
       }
     }
   }
