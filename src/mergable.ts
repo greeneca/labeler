@@ -29,7 +29,7 @@ export function getMergable(): Mergable | undefined {
     core.debug(`   no pull request found in context`);
     return undefined;
   }
-  core.debug(`   pull request is ${pullRequest}`);
+  core.debug(`   pull request is ${Object.keys(pullRequest)}`);
 
   return pullRequest.mergeableState as Mergable;
 }
