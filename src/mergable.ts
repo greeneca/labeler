@@ -5,7 +5,7 @@ export interface MergableMatchConfig {
   mergable?: string[];
 }
 
-type Mergable = 'dirty' | 'blocked' | 'behind' | 'clean';
+export type Mergable = 'dirty' | 'blocked' | 'behind' | 'clean';
 
 export function toMergableMatchConfig(config: any): MergableMatchConfig {
   if (!config['mergable']) {
@@ -21,17 +21,6 @@ mergableConfig.mergable = [mergableConfig.mergable];
   }
 
   return mergableConfig;
-}
-
-export function getMergable(): Mergable | undefined {
-  const pullRequest = github.context.payload.pull_request;
-  if (!pullRequest) {
-    core.debug(`   no pull request found in context`);
-    return undefined;
-  }
-  core.debug(`   pull request state is ${pullRequest.mergeable_state}`);
-
-  return pullRequest.mergeable_state as Mergable;
 }
 
 export function checkAnyMergable(

@@ -1064,13 +1064,12 @@ function labeler() {
                 _c = pullRequests_1_1.value;
                 _d = false;
                 const pullRequest = _c;
-                core.debug(`   pull request state is ${pullRequest.data.mergeable_state}`);
                 const labelConfigs = yield api.getLabelConfigs(client, configPath);
                 const preexistingLabels = pullRequest.data.labels.map(l => l.name);
                 const allLabels = new Set(preexistingLabels);
                 for (const [label, configs] of labelConfigs.entries()) {
                     core.debug(`processing ${label}`);
-                    if (checkMatchConfigs(pullRequest.changedFiles, configs, dot)) {
+                    if (checkMatchConfigs(pullRequest.changedFiles, configs, dot, pullRequest.data.mergable_state)) {
                         allLabels.add(label);
                     }
                     else if (syncLabels) {
@@ -1113,34 +1112,34 @@ function labeler() {
         }
     });
 }
-function checkMatchConfigs(changedFiles, matchConfigs, dot) {
+function checkMatchConfigs(changedFiles, matchConfigs, dot, pr_state) {
     for (const config of matchConfigs) {
         core.debug(` checking config ${JSON.stringify(config)}`);
-        if (!checkMatch(changedFiles, config, dot)) {
+        if (!checkMatch(changedFiles, config, dot, pr_state)) {
             return false;
         }
     }
     return true;
 }
-function checkMatch(changedFiles, matchConfig, dot) {
+function checkMatch(changedFiles, matchConfig, dot, pr_state) {
     if (!Object.keys(matchConfig).length) {
         core.debug(`  no "any" or "all" patterns to check`);
         return false;
     }
     if (matchConfig.all) {
-        if (!checkAll(matchConfig.all, changedFiles, dot)) {
+        if (!checkAll(matchConfig.all, changedFiles, dot, pr_state)) {
             return false;
         }
     }
     if (matchConfig.any) {
-        if (!checkAny(matchConfig.any, changedFiles, dot)) {
+        if (!checkAny(matchConfig.any, changedFiles, dot, pr_state)) {
             return false;
         }
     }
     return true;
 }
 // equivalent to "Array.some()" but expanded for debugging and clarity
-function checkAny(matchConfigs, changedFiles, dot) {
+function checkAny(matchConfigs, changedFiles, dot, pr_state) {
     core.debug(`  checking "any" patterns`);
     if (!matchConfigs.length ||
         !matchConfigs.some(configOption => Object.keys(configOption).length)) {
@@ -1167,7 +1166,7 @@ function checkAny(matchConfigs, changedFiles, dot) {
             }
         }
         if (matchConfig.mergable) {
-            if ((0, mergable_1.checkAnyMergable)(matchConfig.mergable, (0, mergable_1.getMergable)())) {
+            if ((0, mergable_1.checkAnyMergable)(matchConfig.mergable, pr_state)) {
                 core.debug(`  "any" patterns matched`);
                 return true;
             }
@@ -1177,7 +1176,7 @@ function checkAny(matchConfigs, changedFiles, dot) {
     return false;
 }
 // equivalent to "Array.every()" but expanded for debugging and clarity
-function checkAll(matchConfigs, changedFiles, dot) {
+function checkAll(matchConfigs, changedFiles, dot, pr_state) {
     core.debug(`  checking "all" patterns`);
     if (!matchConfigs.length ||
         !matchConfigs.some(configOption => Object.keys(configOption).length)) {
@@ -1208,7 +1207,7 @@ function checkAll(matchConfigs, changedFiles, dot) {
             }
         }
         if (matchConfig.mergable) {
-            if ((0, mergable_1.checkAllMergable)(matchConfig.mergable, (0, mergable_1.getMergable)())) {
+            if ((0, mergable_1.checkAllMergable)(matchConfig.mergable, pr_state)) {
                 core.debug(`  "any" patterns matched`);
                 return true;
             }
@@ -1261,11 +1260,9 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.toMergableMatchConfig = toMergableMatchConfig;
-exports.getMergable = getMergable;
 exports.checkAnyMergable = checkAnyMergable;
 exports.checkAllMergable = checkAllMergable;
 const core = __importStar(__nccwpck_require__(7484));
-const github = __importStar(__nccwpck_require__(3228));
 function toMergableMatchConfig(config) {
     if (!config['mergable']) {
         return {};
@@ -1277,15 +1274,6 @@ function toMergableMatchConfig(config) {
         mergableConfig.mergable = [mergableConfig.mergable];
     }
     return mergableConfig;
-}
-function getMergable() {
-    const pullRequest = github.context.payload.pull_request;
-    if (!pullRequest) {
-        core.debug(`   no pull request found in context`);
-        return undefined;
-    }
-    core.debug(`   pull request state is ${pullRequest.mergeable_state}`);
-    return pullRequest.mergeable_state;
 }
 function checkAnyMergable(regexps, mergable) {
     if (!mergable) {

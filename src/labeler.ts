@@ -11,7 +11,7 @@ import {checkAllChangedFiles, checkAnyChangedFiles} from './changedFiles';
 
 import {checkAnyBranch, checkAllBranch} from './branch';
 
-import {checkAnyMergable, checkAllMergable, getMergable} from './mergable';
+import {Mergable, checkAnyMergable, checkAllMergable} from './mergable';
 
 type ClientType = ReturnType<typeof github.getOctokit>;
 
@@ -37,7 +37,6 @@ async function labeler() {
   const pullRequests = api.getPullRequests(client, prNumbers);
 
   for await (const pullRequest of pullRequests) {
-    core.debug(`   pull request state is ${pullRequest.data.mergeable_state}`);
     const labelConfigs: Map<string, MatchConfig[]> = await api.getLabelConfigs(
       client,
       configPath
@@ -47,7 +46,7 @@ async function labeler() {
 
     for (const [label, configs] of labelConfigs.entries()) {
       core.debug(`processing ${label}`);
-      if (checkMatchConfigs(pullRequest.changedFiles, configs, dot)) {
+      if (checkMatchConfigs(pullRequest.changedFiles, configs, dot, pullRequest.data.mergable_state)) {
         allLabels.add(label);
       } else if (syncLabels) {
         allLabels.delete(label);
@@ -103,11 +102,12 @@ async function labeler() {
 export function checkMatchConfigs(
   changedFiles: string[],
   matchConfigs: MatchConfig[],
-  dot: boolean
+  dot: boolean,
+  pr_state: Mergable | undefined
 ): boolean {
   for (const config of matchConfigs) {
     core.debug(` checking config ${JSON.stringify(config)}`);
-    if (!checkMatch(changedFiles, config, dot)) {
+    if (!checkMatch(changedFiles, config, dot, pr_state)) {
       return false;
     }
   }
@@ -118,7 +118,8 @@ export function checkMatchConfigs(
 function checkMatch(
   changedFiles: string[],
   matchConfig: MatchConfig,
-  dot: boolean
+  dot: boolean,
+  pr_state: Mergable | undefined
 ): boolean {
   if (!Object.keys(matchConfig).length) {
     core.debug(`  no "any" or "all" patterns to check`);
@@ -126,13 +127,13 @@ function checkMatch(
   }
 
   if (matchConfig.all) {
-    if (!checkAll(matchConfig.all, changedFiles, dot)) {
+    if (!checkAll(matchConfig.all, changedFiles, dot, pr_state)) {
       return false;
     }
   }
 
   if (matchConfig.any) {
-    if (!checkAny(matchConfig.any, changedFiles, dot)) {
+    if (!checkAny(matchConfig.any, changedFiles, dot, pr_state)) {
       return false;
     }
   }
@@ -144,7 +145,8 @@ function checkMatch(
 export function checkAny(
   matchConfigs: BaseMatchConfig[],
   changedFiles: string[],
-  dot: boolean
+  dot: boolean,
+  pr_state: Mergable | undefined
 ): boolean {
   core.debug(`  checking "any" patterns`);
   if (
@@ -178,7 +180,7 @@ export function checkAny(
     }
 
     if (matchConfig.mergable) {
-      if (checkAnyMergable(matchConfig.mergable, getMergable())) {
+      if (checkAnyMergable(matchConfig.mergable, pr_state)) {
         core.debug(`  "any" patterns matched`);
         return true;
       }
@@ -193,7 +195,8 @@ export function checkAny(
 export function checkAll(
   matchConfigs: BaseMatchConfig[],
   changedFiles: string[],
-  dot: boolean
+  dot: boolean,
+  pr_state: Mergable | undefined
 ): boolean {
   core.debug(`  checking "all" patterns`);
   if (
@@ -232,7 +235,7 @@ export function checkAll(
     }
 
     if (matchConfig.mergable) {
-      if (checkAllMergable(matchConfig.mergable, getMergable())) {
+      if (checkAllMergable(matchConfig.mergable, pr_state)) {
         core.debug(`  "any" patterns matched`);
         return true;
       }
