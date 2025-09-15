@@ -46,6 +46,7 @@ async function labeler() {
 
     for (const [label, configs] of labelConfigs.entries()) {
       core.debug(`processing ${label}`);
+      core.debug(` state: ${pullRequest.data.mergable_state}`);
       if (checkMatchConfigs(pullRequest.changedFiles, configs, dot, pullRequest.data.mergable_state)) {
         allLabels.add(label);
       } else if (syncLabels) {

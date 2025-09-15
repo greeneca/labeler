@@ -1069,6 +1069,7 @@ function labeler() {
                 const allLabels = new Set(preexistingLabels);
                 for (const [label, configs] of labelConfigs.entries()) {
                     core.debug(`processing ${label}`);
+                    core.debug(` state: ${pullRequest.data.mergable_state}`);
                     if (checkMatchConfigs(pullRequest.changedFiles, configs, dot, pullRequest.data.mergable_state)) {
                         allLabels.add(label);
                     }
@@ -1277,7 +1278,7 @@ function toMergableMatchConfig(config) {
 }
 function checkAnyMergable(regexps, mergable) {
     if (!mergable) {
-        core.debug(`   no mergable status`);
+        core.debug(`   no mergable status: ${mergable}`);
         return false;
     }
     core.debug(`   checking "mergable" pattern against ${mergable}`);
@@ -1293,7 +1294,7 @@ function checkAnyMergable(regexps, mergable) {
 }
 function checkAllMergable(regexps, mergable) {
     if (!mergable) {
-        core.debug(`   no mergable status`);
+        core.debug(`   no mergable status: ${mergable}`);
         return false;
     }
     core.debug(`   checking "mergable" pattern against ${mergable}`);

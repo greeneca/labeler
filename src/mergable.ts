@@ -28,7 +28,7 @@ export function checkAnyMergable(
   mergable: Mergable | undefined
 ): boolean {
   if (!mergable) {
-    core.debug(`   no mergable status`);
+    core.debug(`   no mergable status: ${mergable}`);
     return false;
   }
 
@@ -50,7 +50,7 @@ export function checkAllMergable(
   mergable: Mergable | undefined
 ): boolean {
   if (!mergable) {
-    core.debug(`   no mergable status`);
+    core.debug(`   no mergable status: ${mergable}`);
     return false;
   }
 
