@@ -37,7 +37,6 @@ async function labeler() {
   const pullRequests = api.getPullRequests(client, prNumbers);
 
   for await (const pullRequest of pullRequests) {
-      core.debug(` state: ${pullRequest.data.mergable_state}`);
 
     const labelConfigs: Map<string, MatchConfig[]> = await api.getLabelConfigs(
       client,
@@ -48,8 +47,8 @@ async function labeler() {
 
     for (const [label, configs] of labelConfigs.entries()) {
       core.debug(`processing ${label}`);
-      core.debug(` state: ${pullRequest.data.mergable_state}`);
-      if (checkMatchConfigs(pullRequest.changedFiles, configs, dot, pullRequest.data.mergable_state)) {
+      core.debug(` state: ${pullRequest.data.mergeable_state}`);
+      if (checkMatchConfigs(pullRequest.changedFiles, configs, dot, pullRequest.data.mergeable_state)) {
         allLabels.add(label);
       } else if (syncLabels) {
         allLabels.delete(label);

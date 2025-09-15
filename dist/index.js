@@ -1064,14 +1064,13 @@ function labeler() {
                 _c = pullRequests_1_1.value;
                 _d = false;
                 const pullRequest = _c;
-                core.debug(` state: ${pullRequest.data.mergable_state}`);
                 const labelConfigs = yield api.getLabelConfigs(client, configPath);
                 const preexistingLabels = pullRequest.data.labels.map(l => l.name);
                 const allLabels = new Set(preexistingLabels);
                 for (const [label, configs] of labelConfigs.entries()) {
                     core.debug(`processing ${label}`);
-                    core.debug(` state: ${pullRequest.data.mergable_state}`);
-                    if (checkMatchConfigs(pullRequest.changedFiles, configs, dot, pullRequest.data.mergable_state)) {
+                    core.debug(` state: ${pullRequest.data.mergeable_state}`);
+                    if (checkMatchConfigs(pullRequest.changedFiles, configs, dot, pullRequest.data.mergeable_state)) {
                         allLabels.add(label);
                     }
                     else if (syncLabels) {
