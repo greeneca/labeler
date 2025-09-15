@@ -1280,8 +1280,10 @@ function toMergableMatchConfig(config) {
 function getMergable() {
     const pullRequest = github.context.payload.pull_request;
     if (!pullRequest) {
+        core.debug(`   no pull request found in context`);
         return undefined;
     }
+    core.debug(`   pull request state is ${pullRequest.mergable_state}`);
     return pullRequest.mergeable_state;
 }
 function checkAnyMergable(regexps, mergable) {
