@@ -29,7 +29,7 @@ export function getMergable(): Mergable | undefined {
     return undefined;
   }
 
-  return pullRequest.mergeable as Mergable;
+  return pullRequest.mergeable_state as Mergable;
 }
 
 export function checkAnyMergable(

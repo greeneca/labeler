@@ -1282,7 +1282,7 @@ function getMergable() {
     if (!pullRequest) {
         return undefined;
     }
-    return pullRequest.mergeable;
+    return pullRequest.mergeable_state;
 }
 function checkAnyMergable(regexps, mergable) {
     if (!mergable) {
