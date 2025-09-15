@@ -29,9 +29,9 @@ export function getMergable(): Mergable | undefined {
     core.debug(`   no pull request found in context`);
     return undefined;
   }
-  core.debug(`   pull request is ${Object.keys(pullRequest)}`);
+  core.debug(`   pull request state is ${pullRequest.mergeable_state}`);
 
-  return pullRequest.mergeableState as Mergable;
+  return pullRequest.mergeable_state as Mergable;
 }
 
 export function checkAnyMergable(

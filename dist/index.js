@@ -1283,8 +1283,8 @@ function getMergable() {
         core.debug(`   no pull request found in context`);
         return undefined;
     }
-    core.debug(`   pull request is ${Object.keys(pullRequest)}`);
-    return pullRequest.mergeableState;
+    core.debug(`   pull request state is ${pullRequest.mergeable_state}`);
+    return pullRequest.mergeable_state;
 }
 function checkAnyMergable(regexps, mergable) {
     if (!mergable) {
