@@ -1064,6 +1064,7 @@ function labeler() {
                 _c = pullRequests_1_1.value;
                 _d = false;
                 const pullRequest = _c;
+                core.debug(` state: ${pullRequest.data.mergable_state}`);
                 const labelConfigs = yield api.getLabelConfigs(client, configPath);
                 const preexistingLabels = pullRequest.data.labels.map(l => l.name);
                 const allLabels = new Set(preexistingLabels);

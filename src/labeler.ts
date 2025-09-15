@@ -37,6 +37,8 @@ async function labeler() {
   const pullRequests = api.getPullRequests(client, prNumbers);
 
   for await (const pullRequest of pullRequests) {
+      core.debug(` state: ${pullRequest.data.mergable_state}`);
+
     const labelConfigs: Map<string, MatchConfig[]> = await api.getLabelConfigs(
       client,
       configPath
